@@ -162,7 +162,7 @@ if model_rf is not None and not df_selected.empty:
         input_dummies = pd.get_dummies(input_df[categorical_cols_app], drop_first=True)
         
         # Preparar el DataFrame final X_pred usando las training_columns
-        X_pred = pd.DataFrame(data=0, index='', columns=training_columns) 
+        X_pred = pd.DataFrame(data=0, index=[0], columns=training_columns) 
         
         # Mapear valores numéricos
         X_pred['Prod. year'] = prod_year
