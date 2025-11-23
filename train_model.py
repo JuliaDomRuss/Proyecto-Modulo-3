@@ -1,4 +1,4 @@
-%%writefile train_model.py
+#%%writefile train_model.py
 import numpy as np
 import pandas as pd
 import joblib # Necesario para guardar el modelo de scikit-learn
