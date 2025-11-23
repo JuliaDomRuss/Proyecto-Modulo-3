@@ -125,7 +125,7 @@ if model_rf is not None and not df_raw.empty:
         # C. Preparar el DataFrame final X_pred usando las training_columns
         
         # Crear un DataFrame vacío con todas las columnas de entrenamiento y llenarlo con ceros
-        X_pred = pd.DataFrame(data=0, index=, columns=training_columns)
+        X_pred = pd.DataFrame(data=0, index='', columns=training_columns)
         
         # Mapear valores numéricos
         X_pred['Prod. year'] = prod_year
