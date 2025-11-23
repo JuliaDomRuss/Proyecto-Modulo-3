@@ -180,7 +180,7 @@ if model_rf is not None and not df_selected.empty:
         # Realizar la Predicción
         try:
             # Predicción similar a la lógica vista en la fuente [11]
-            prediction = model_rf.predict(X_pred) 
+            prediction = model_rf.predict[0](X_pred) 
             
             # Mostrar el resultado
             st.subheader("Resultado de la Predicción")
