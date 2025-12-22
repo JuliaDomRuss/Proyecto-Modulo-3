@@ -118,14 +118,20 @@ if model_rf is not None and not df_selected.empty:
         options=df_selected["Manufacturer"].unique()
     )
     
+    #Creamos un df que solo tenga valores para el fabricante seleccionado.
+    df_modelos_filtrados = df_selected[df_selected["Manufacturer"] == manufacturer]
+    
     model_car = st.sidebar.selectbox(
         "Modelo (Model):",
-        options=df_selected["Model"].unique()
+        options=df_modelos_filtrados["Model"].unique()
     )
+    
+    #Creamos un df que solo tenga valores para el modelo seleccionado.
+    df_categorias_filtradas = df_modelos_filtrados[df_modelos_filtrados["Model"] == model_car]
     
     category = st.sidebar.selectbox(
         "Categoría:",
-        options=df_selected["Category"].unique()
+        options=df_categorias_filtradas["Category"].unique()
     )
     
     fuel_type = st.sidebar.selectbox(
@@ -175,7 +181,7 @@ if model_rf is not None and not df_selected.empty:
         for col in input_dummies.columns:
             if col in training_columns:
                 # Usa iloc para obtener el valor del input_dummies
-                X_pred[col] = input_dummies[col].iloc
+                X_pred[col] = input_dummies[col].iloc[0]
 
         # Realizar la Predicción
         try:
