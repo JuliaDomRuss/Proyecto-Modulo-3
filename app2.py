@@ -163,37 +163,37 @@ if model_rf is not None and not df_selected.empty:
         }
         input_df = pd.DataFrame(data_input)
         
-        # Aplicar la Codificación One-Hot
-        categorical_cols_app = ['Manufacturer', 'Model', 'Category', 'Fuel type', 'Gear box type']
-        input_dummies = pd.get_dummies(input_df[categorical_cols_app], drop_first=True)
-        
-        # Preparar el DataFrame final X_pred usando las training_columns
+        # 2. Preparar el DataFrame X_pred con CEROS usando las columnas exactas del modelo
+        # Esto asegura que el modelo reciba la estructura que espera.
         X_pred = pd.DataFrame(data=0, index=[0], columns=training_columns) 
         
-        # Mapear valores numéricos
+        # 3. Asignar valor numérico del año
         X_pred['Prod. year'] = prod_year
         
-        # Mapear característica Is_Turbo
+        # 4. Asignar Is_Turbo
         if 'Is_Turbo' in training_columns: 
              X_pred['Is_Turbo'] = 1 if is_turbo else 0
              
-        # Mapear variables categóricas (One-Hot)
-        for col in input_dummies.columns:
-            if col in training_columns:
-                # Usa iloc para obtener el valor del input_dummies
-                X_pred[col] = input_dummies[col].iloc
+        # 5. MAPEADO DINÁMICO
+        
+        columnas_categoricas = ['Manufacturer', 'Model', 'Category', 'Fuel type', 'Gear box type']
+        
+        for col_nombre in columnas_categoricas:
+            valor_elegido = str(input_df[col_nombre].iloc[0])
+            # Construimos el nombre de la columna: "NombreColumna_Valor"
+            # Ejemplo: "Manufacturer_NISSAN"
+            col_con_prefijo = f"{col_nombre}_{valor_elegido}"
+            
+            if col_con_prefijo in training_columns:
+                X_pred[col_con_prefijo] = 1
 
-        # Realizar la Predicción
+        # 6. Realizar la Predicción
         try:
-            # Predicción similar a la lógica vista en la fuente [11]
+
             prediction = model_rf.predict(X_pred)[0]
             
-            # Mostrar el resultado
             st.subheader("Resultado de la Predicción")
-            st.success(f"**Predicción del precio del vehículo (USD): ${prediction:,.2f}**")
+            st.success(f"**Precio estimado del vehículo: ${prediction:,.2f} USD**")
             
-        except ValueError as e:
-            st.error(f"Error al realizar la predicción. Detalle: {e}")
-
-else:
-    st.warning("No se pudo iniciar la aplicación. Revise si el archivo 'car_price_prediction.csv' está en el directorio.")
+        except Exception as e:
+            st.error(f"Error al realizar la predicción: {e}")
