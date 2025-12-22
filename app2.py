@@ -181,7 +181,7 @@ if model_rf is not None and not df_selected.empty:
         for col in input_dummies.columns:
             if col in training_columns:
                 # Usa iloc para obtener el valor del input_dummies
-                X_pred[col] = input_dummies[col].iloc[0]
+                X_pred[col] = input_dummies[col].iloc
 
         # Realizar la Predicción
         try:
