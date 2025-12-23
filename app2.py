@@ -84,12 +84,12 @@ def load_and_train_model():
     model_rf.fit(X_train, y_train) # [9]
     
     st.success("Modelo entrenado y recursos listos.")
-    
-    # Retornamos el modelo, las columnas de entrenamiento y el DataFrame seleccionado (para widgets)
-    return model_rf, training_columns, df_selected
+    importancias = pd.Series(model_rf.feature_importances_, index=training_columns)
+    # Retornamos el modelo, las columnas de entrenamiento , el gáfico de importancias y el DataFrame seleccionado (para widgets)
+    return model_rf, training_columns, df_selected , importancias
 
 # Cargar/Entrenar el modelo
-model_rf, training_columns, df_selected = load_and_train_model()
+model_rf, training_columns, df_selected, importancias_raw = load_and_train_model()
 
 # -----------------------------
 # 2. INTERFAZ DE ENTRADA DE USUARIO (WIDGETS) [10]
