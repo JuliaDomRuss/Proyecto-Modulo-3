@@ -30,12 +30,17 @@ st.markdown("""
 st.title("🚗 Predicción del Precio de Carros con Random Forest")
 st.subheader("Utilice la barra lateral para ingresar las características del vehículo.")
 
-# 2. FUNCIÓN DE CARGA Y ENTRENAMIENTO
+# Variable de estado para controlar si ya se hizo una predicción
+if 'prediction_made' not in st.session_state:
+    st.session_state.prediction_made = False
+
+# Variable para el placeholder del mensaje
+if 'success_placeholder' not in st.session_state:
+    st.session_state.success_placeholder = None
+
+# 2. FUNCIÓN DE CARGA Y ENTRENAMIENTO (sin cambios en la lógica de entrenamiento)
 @st.cache_resource 
 def load_and_train_model():
-    mensaje_carga = st.empty()
-    mensaje_carga.info("Iniciando carga y entrenamiento del modelo (Esto solo ocurre la primera vez)...")
-    
     try:
         df = pd.read_csv('car_price_prediction.csv')
         
@@ -67,18 +72,28 @@ def load_and_train_model():
         
         importancias = pd.Series(model_rf.feature_importances_, index=training_columns)
         
-        mensaje_carga.empty()
-        success_placeholder = st.empty() 
-        success_placeholder.success("✅ Modelo listo para usar.")
-        return model_rf, training_columns, df_selected, importancias, success_placeholder
+        return model_rf, training_columns, df_selected, importancias
 
     except Exception as e:
         st.error(f"Error al cargar datos o entrenar: {e}")
         return None, None, None, None
 
-model_rf, training_columns, df_selected, importancias_raw, success_placeholder = load_and_train_model()
+# Cargar el modelo
+model_rf, training_columns, df_selected, importancias_raw = load_and_train_model()
 
-# 3. INTERFAZ (SIDEBAR)
+# 3. MOSTRAR MENSAJE INICIAL (solo si no se ha hecho predicción y el modelo está cargado)
+if model_rf is not None and not st.session_state.prediction_made:
+    # Mostrar mensaje de información de carga
+    with st.spinner("Cargando y entrenando modelo..."):
+        # Pequeña pausa para mostrar el spinner
+        pass
+    
+    # Mostrar mensaje de éxito
+    if st.session_state.success_placeholder is None:
+        st.session_state.success_placeholder = st.empty()
+        st.session_state.success_placeholder.success("✅ Modelo listo para usar.")
+
+# 4. INTERFAZ (SIDEBAR)
 if model_rf is not None:
     st.sidebar.header("Variables de Predicción")
     
@@ -98,7 +113,14 @@ if model_rf is not None:
 
     # BOTÓN DE PREDICCIÓN EN EL SIDEBAR
     if st.sidebar.button("Obtener Predicción"):
-        success_placeholder.empty()
+        # Marcar que ya se hizo una predicción
+        st.session_state.prediction_made = True
+        
+        # Eliminar el mensaje de éxito si existe
+        if st.session_state.success_placeholder is not None:
+            st.session_state.success_placeholder.empty()
+            st.session_state.success_placeholder = None
+        
         X_pred = pd.DataFrame(data=0, index=[0], columns=training_columns)
         X_pred['Prod. year'] = prod_year
         if 'Is_Turbo' in training_columns:
@@ -141,7 +163,7 @@ if model_rf is not None:
             st.subheader("📊 Importancia de Variables en esta Predicción")
             
             feat_imp = importancias_raw.sort_values(ascending=False).head(7)
-            # Creamos un DF para que Plotly asigne colores distintos por nombre
+            # Creamos un DF para que Plotly asigna colores distintos por nombre
             df_grafico = pd.DataFrame({
                 'Variable': feat_imp.index,
                 'Importancia': feat_imp.values
