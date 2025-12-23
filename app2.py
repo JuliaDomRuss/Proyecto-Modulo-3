@@ -3,9 +3,28 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-
-st.title("🚗 Predicción del Precio de Carros (Random Forest)")
+st.set_page_config(page_title="Predicción de Autos", layout="wide")
+st.title("🚗 Predicción del Precio de Carros con Random Forest")
 st.subheader("Utilice la barra lateral para ingresar las características del vehículo.")
+st.markdown("""
+    <style>
+    div.stButton > button:first-child {
+        background-color: #FF4B4B; /* Rojo */
+        color: white;
+        width: 100%; 
+        border-radius: 10px;
+        height: 3em;
+        font-weight: bold;
+        border: none;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #FF2B2B;
+        color: white;
+        border: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 
 # ----------------------------------------------------------------------
 # 1. FUNCIÓN DE CARGA Y ENTRENAMIENTO CACHEADO
@@ -15,8 +34,10 @@ st.subheader("Utilice la barra lateral para ingresar las características del ve
 @st.cache_resource 
 def load_and_train_model():
     """Carga los datos, aplica el preprocesamiento completo, entrena el modelo 
-    y retorna el modelo ajustado, las columnas de entrenamiento y el dataframe base."""
-    st.info("Iniciando carga y entrenamiento del modelo (Esto solo ocurre la primera vez).")
+    y retorna el modelo ajustado, las columnas de entrenamiento, la grafica de importancia y el dataframe base."""
+    
+    mensaje_carga = st.empty()
+    mensaje_carga.info("Iniciando carga y entrenamiento del modelo (Esto solo ocurre la primera vez)...")
     
     try:
         # Cargar el dataset (debe estar en la misma carpeta del repositorio)
@@ -83,10 +104,17 @@ def load_and_train_model():
     model_rf = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1) # [3]
     model_rf.fit(X_train, y_train) # [9]
     
-    st.success("Modelo entrenado y recursos listos.")
+    mensaje_carga.empty()
+    st.success("✅ Modelo listo para usar.")
+    
     importancias = pd.Series(model_rf.feature_importances_, index=training_columns)
     # Retornamos el modelo, las columnas de entrenamiento , el gáfico de importancias y el DataFrame seleccionado (para widgets)
     return model_rf, training_columns, df_selected , importancias
+    
+except Exception as e:
+        mensaje_carga.empty() 
+        st.error(f"Error: {e}")
+        return None, None, None, None
 
 # Cargar/Entrenar el modelo
 model_rf, training_columns, df_selected, importancias_raw = load_and_train_model()
@@ -147,7 +175,7 @@ if model_rf is not None and not df_selected.empty:
     # Input de Feature Engineered (Is_Turbo)
     is_turbo = st.sidebar.checkbox("¿Es Turbo?", value=False)
     
-    if st.button("Obtener Predicción"):
+    if st.sidebar.button("Obtener Predicción"):
         
         # -----------------------------
         # 3. CONSTRUCCIÓN Y PREDICCIÓN
@@ -234,8 +262,8 @@ if model_rf is not None and not df_selected.empty:
                 x=feat_imp.values,
                 y=feat_imp.index,
                 orientation='h',
-                color=feat_imp.values,
-                color_continuous_scale='Blues',
+                color='Variable',
+                color_discrete_sequence=px.colors.qualitative.Pastel='Blues',
                 labels={'x': 'Influencia en el Precio', 'y': 'Variable'}
             )
             fig.update_layout(showlegend=False, height=350, margin=dict(l=20, r=20, t=20, b=20))
