@@ -106,15 +106,10 @@ def load_and_train_model():
     
     mensaje_carga.empty()
     st.success("✅ Modelo listo para usar.")
-    
     importancias = pd.Series(model_rf.feature_importances_, index=training_columns)
+    
     # Retornamos el modelo, las columnas de entrenamiento , el gáfico de importancias y el DataFrame seleccionado (para widgets)
     return model_rf, training_columns, df_selected , importancias
-    
-except Exception as e:
-        mensaje_carga.empty() 
-        st.error(f"Error: {e}")
-        return None, None, None, None
 
 # Cargar/Entrenar el modelo
 model_rf, training_columns, df_selected, importancias_raw = load_and_train_model()
@@ -263,7 +258,7 @@ if model_rf is not None and not df_selected.empty:
                 y=feat_imp.index,
                 orientation='h',
                 color='Variable',
-                color_discrete_sequence=px.colors.qualitative.Pastel='Blues',
+                color_discrete_sequence=px.colors.qualitative.Pastel,
                 labels={'x': 'Influencia en el Precio', 'y': 'Variable'}
             )
             fig.update_layout(showlegend=False, height=350, margin=dict(l=20, r=20, t=20, b=20))
