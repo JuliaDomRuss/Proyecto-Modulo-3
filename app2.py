@@ -189,11 +189,57 @@ if model_rf is not None and not df_selected.empty:
 
         # 6. Realizar la Predicción
         try:
-
             prediction = model_rf.predict(X_pred)[0]
             
-            st.subheader("Resultado de la Predicción")
-            st.success(f"**Precio estimado del vehículo: ${prediction:,.2f} USD**")
+            st.markdown("---")
+            # --- PARTE SUPERIOR: CUADROS CENTRADOS ---
+            col_izq, col_der = st.columns(2)
+            
+            with col_izq:
+                # Cuadro Azul para el Precio
+                st.markdown("""
+                    <div style="background-color:#1E3A8A; color:white; padding:25px; border-radius:15px; text-align:center;">
+                        <h3 style="color:white; margin:0;">Precio Predicho</h3>
+                        <h1 style="color:white; margin:10px 0;">${:,.2f} USD</h1>
+                    </div>
+                """.format(prediction), unsafe_allow_html=True)
+
+            with col_der:
+                # Cuadro Gris con el Resumen (Características)
+                st.markdown(f"""
+                    <div style="background-color:#374151; color:white; padding:20px; border-radius:15px; font-size: 14px;">
+                        <h4 style="color:white; margin-top:0;">Resumen del Vehículo</h4>
+                        <hr style="margin:10px 0; border:0.5px solid #4B5563;">
+                        <b>Fabricante:</b> {manufacturer}<br>
+                        <b>Modelo:</b> {model_car}<br>
+                        <b>Año:</b> {prod_year}<br>
+                        <b>Categoría:</b> {category}<br>
+                        <b>Combustible:</b> {fuel_type}<br>
+                        <b>Transmisión:</b> {gear_box_type}
+                    </div>
+                """, unsafe_allow_html=True)
+
+            # --- PARTE INFERIOR: GRÁFICO DE BARRAS (Debajo de los cuadros) ---
+            st.write("##") # Espacio
+            st.subheader("📊 Importancia de Variables en esta Predicción")
+            
+            # Procesamos las importancias para que se vean bien (Top 7)
+            import pandas as pd
+            import plotly.express as px
+            
+            # Limpiamos los nombres de las columnas para el gráfico
+            feat_imp = importancias_raw.sort_values(ascending=False).head(7)
+            
+            fig = px.bar(
+                x=feat_imp.values,
+                y=feat_imp.index,
+                orientation='h',
+                color=feat_imp.values,
+                color_continuous_scale='Blues',
+                labels={'x': 'Influencia en el Precio', 'y': 'Variable'}
+            )
+            fig.update_layout(showlegend=False, height=350, margin=dict(l=20, r=20, t=20, b=20))
+            st.plotly_chart(fig, use_container_width=True)
             
         except Exception as e:
             st.error(f"Error al realizar la predicción: {e}")
