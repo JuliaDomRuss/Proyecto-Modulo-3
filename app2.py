@@ -95,11 +95,10 @@ if model_rf is not None:
     gear_box_type = st.sidebar.selectbox("Transmisión:", options=df_selected["Gear box type"].unique())
     is_turbo = st.sidebar.checkbox("¿Es Turbo?", value=False)
     
-    if st.sidebar.button("Obtener Predicción"):
-        success_placeholder.empty()
 
     # BOTÓN DE PREDICCIÓN EN EL SIDEBAR
     if st.sidebar.button("Obtener Predicción"):
+        success_placeholder.empty()
         X_pred = pd.DataFrame(data=0, index=[0], columns=training_columns)
         X_pred['Prod. year'] = prod_year
         if 'Is_Turbo' in training_columns:
