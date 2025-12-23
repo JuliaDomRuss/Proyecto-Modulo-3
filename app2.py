@@ -68,14 +68,15 @@ def load_and_train_model():
         importancias = pd.Series(model_rf.feature_importances_, index=training_columns)
         
         mensaje_carga.empty()
-        st.success("✅ Modelo listo para usar.")
-        return model_rf, training_columns, df_selected, importancias
+        success_placeholder = st.empty() 
+        success_placeholder.success("✅ Modelo listo para usar.")
+        return model_rf, training_columns, df_selected, importancias, success_placeholder
 
     except Exception as e:
         st.error(f"Error al cargar datos o entrenar: {e}")
         return None, None, None, None
 
-model_rf, training_columns, df_selected, importancias_raw = load_and_train_model()
+model_rf, training_columns, df_selected, importancias_raw, success_placeholder = load_and_train_model()
 
 # 3. INTERFAZ (SIDEBAR)
 if model_rf is not None:
@@ -93,6 +94,9 @@ if model_rf is not None:
     fuel_type = st.sidebar.selectbox("Combustible:", options=df_selected["Fuel type"].unique())
     gear_box_type = st.sidebar.selectbox("Transmisión:", options=df_selected["Gear box type"].unique())
     is_turbo = st.sidebar.checkbox("¿Es Turbo?", value=False)
+    
+    if st.sidebar.button("Obtener Predicción"):
+        success_placeholder.empty()
 
     # BOTÓN DE PREDICCIÓN EN EL SIDEBAR
     if st.sidebar.button("Obtener Predicción"):
